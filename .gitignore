@@ -12,7 +12,7 @@ backend/*.iml
 backend/*.jar
 backend/logs/
 # 忽略真实的开发配置，但保留模板文件
-backend/**/src/main/resources/application-dev.yaml
+**/application-dev.yaml
 
 # 环境配置
 .env

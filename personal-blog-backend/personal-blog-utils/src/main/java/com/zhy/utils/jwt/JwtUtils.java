@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.Map;
 
-@Component // ← 让 Spring 管理这个类
+@Component
 public class JwtUtils {
 
     @Value("${jwt.secret:SVRIRUlNQQ==}")

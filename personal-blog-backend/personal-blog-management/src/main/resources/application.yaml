@@ -38,3 +38,27 @@ aliyun:
 jwt:
   secret: ${JWT_SECRET:your_base64_encoded_secret} #签名密钥
   expire: 43200000 #令牌过期时间
+
+# 登录放行白名单
+# 拦截器白名单
+interceptor:
+  whitelist:
+    # ===== 认证与用户 =====
+    - /api/auth/login
+    - /api/auth/me
+
+    # ===== 前台公开接口（游客可访问） =====
+    - /api/articles
+    - /api/articles/*
+    - /api/categories
+    - /api/tags
+    - /api/archives
+    - /api/stats
+
+    # ===== Knife4j / Swagger 文档（开发环境需放行） =====
+    - /doc.html
+    - /webjars/**
+    - /v2/api-docs
+    - /swagger-resources/**
+    - /swagger-ui/**
+    - /favicon.ico
