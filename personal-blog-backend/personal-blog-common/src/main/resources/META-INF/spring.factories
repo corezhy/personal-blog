@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.zhy.common.config.SwaggerConfiguration,\
+  com.zhy.common.config.MybatisConfig
