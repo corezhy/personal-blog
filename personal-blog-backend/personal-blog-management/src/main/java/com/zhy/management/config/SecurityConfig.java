@@ -1,4 +1,4 @@
-package com.zhy.common.config;
+package com.zhy.management.config;
 
 import com.zhy.management.filter.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;

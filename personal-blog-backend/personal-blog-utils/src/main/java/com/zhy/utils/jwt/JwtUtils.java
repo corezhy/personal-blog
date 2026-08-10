@@ -26,10 +26,21 @@ public class JwtUtils {
                 .compact();
     }
 
+    // 新增方法，支持subject
+    public String generateJwt(String subject, Map<String, Object> claims) {
+        return Jwts.builder()
+                .setSubject(subject)
+                .addClaims(claims)
+                .setExpiration(new Date(System.currentTimeMillis() + expire))
+                .signWith(SignatureAlgorithm.HS256, signKey)
+                .compact();
+    }
     public Claims parseJWT(String jwt) {
         return Jwts.parser()
                 .setSigningKey(signKey)
                 .parseClaimsJws(jwt)
                 .getBody();
     }
+
+
 }

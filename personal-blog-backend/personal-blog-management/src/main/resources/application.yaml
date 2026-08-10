@@ -1,3 +1,5 @@
+server:
+  port: 8080  # 端口
 spring:
   application:
     name: personal-blog
@@ -44,17 +46,15 @@ jwt:
 interceptor:
   whitelist:
     # ===== 认证与用户 =====
-    - /api/auth/login
-    - /api/auth/me
-
+    - /auth/login
+    - /auth/me
     # ===== 前台公开接口（游客可访问） =====
-    - /api/articles
-    - /api/articles/*
-    - /api/categories
-    - /api/tags
-    - /api/archives
-    - /api/stats
-
+    - /articles
+    - /articles/*
+    - /categories
+    - /tags
+    - /archives
+    - /stats
     # ===== Knife4j / Swagger 文档（开发环境需放行） =====
     - /doc.html
     - /webjars/**

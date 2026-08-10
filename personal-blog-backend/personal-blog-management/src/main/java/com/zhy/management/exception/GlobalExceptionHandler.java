@@ -4,8 +4,11 @@ import com.zhy.common.result.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.stream.Collectors;
 
 /**
  * 全局异常处理器
@@ -40,4 +43,32 @@ public class GlobalExceptionHandler {
         log.error("系统异常：", e);
         return Result.error("系统繁忙，请稍后再试");
     }
+
+    /**
+     * JSR303参数校验异常
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Result<Void> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        // 获取第一个错误信息（也可返回全部）
+        String errorMsg = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(fieldError -> fieldError.getDefaultMessage())
+                .findFirst()
+                .orElse("参数校验失败");
+
+        return Result.error(errorMsg);
+    }
+
+    /**
+     * 处理业务异常（你抛的 BusinessException）
+     */
+    @ExceptionHandler(BusinessException.class)
+    public Result handleBusinessException(BusinessException e) {
+        log.warn("业务异常: {}", e.getMessage());
+        return Result.error(e.getMessage());
+    }
+
 }

@@ -1,6 +1,6 @@
 package com.zhy.management.filter;
 
-import com.zhy.common.config.SecurityProperties;
+import com.zhy.management.config.SecurityProperties;
 import com.zhy.utils.jwt.JwtUtils;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +43,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain chain) throws ServletException, IOException {
 
+        log.info("Whitelist from config: {}", securityProperties.getWhitelist());
+        log.info("Request URI: {}", request.getRequestURI());
+
         // 1. 检查是否白名单（白名单直接放行，不解析 Token）
         String requestUri = request.getRequestURI();
         List<String> whitelist = securityProperties.getWhitelist();
@@ -82,7 +85,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 5. 构造 Spring Security 的认证对象
         // 注意：角色需要加上 "ROLE_" 前缀（Spring Security 默认规则）
-        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()); //数据库role是小写，转为大写，例如：ROLE_ADMIN
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(
                         userId, // principal（可以是用户 ID 或对象）
