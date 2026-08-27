@@ -7,6 +7,7 @@ import type { FormInstance, FormRules } from 'element-plus'
 import { onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
+import MarkdownEditor from '@/components/business/MarkdownEditor.vue'
 import MarkdownRenderer from '@/components/business/MarkdownRenderer.vue'
 import { useTaxonomy } from '@/hooks/useTaxonomy'
 import { createArticle, getArticleDetail, updateArticle } from '@/services/article'
@@ -138,12 +139,10 @@ async function handleSave(): Promise<void> {
       <el-form-item label="内容（Markdown）" prop="content">
         <el-tabs v-model="activeTab" class="w-full">
           <el-tab-pane label="编辑" name="edit">
-            <el-input
+            <MarkdownEditor
               v-model="form.content"
-              type="textarea"
               :rows="16"
               placeholder="支持 Markdown 语法，标题会自动生成目录"
-              class="font-mono"
             />
           </el-tab-pane>
           <el-tab-pane label="预览" name="preview">
