@@ -16,6 +16,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -57,7 +58,15 @@ public class LoginServiceImpl extends ServiceImpl<LoginMapper, SysUser> implemen
         claims.put("username", user.getUsername());
         String token = jwtUtils.generateJwt(user.getId().toString(), claims);
 
-        // 5.组装返回数据
+        // 5.设置最近登录时间
+        boolean isSuccess = update(Wrappers.<SysUser>lambdaUpdate()
+                .set(SysUser::getLastLoginAt, LocalDateTime.now())
+                .eq(SysUser::getId, user.getId()));
+        if (!isSuccess) {
+            throw new BusinessException("设置最近登录时间失败！");
+        }
+
+        // 6.组装返回数据
         UserInfoVo userInfo = UserInfoVo.builder()
                 .id(user.getId())
                 .role(user.getRole())

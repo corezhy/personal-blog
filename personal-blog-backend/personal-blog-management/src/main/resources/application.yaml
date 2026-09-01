@@ -48,13 +48,14 @@ interceptor:
     # ===== 认证与用户 =====
     - /auth/login
     - /auth/me
-    # ===== 前台公开接口（游客可访问） =====
-    - /articles
-    - /articles/*
-    - /categories
-    - /tags
-    - /archives
-    - /stats
+    # ===== 前台公开接口（游客可读；前缀 GET: 表示仅放行该方法的读操作，
+    #      增删改等写操作不走白名单，由 authenticated + @PreAuthorize 控制） =====
+    - GET:/articles
+    - GET:/articles/*
+    - GET:/categories
+    - GET:/tags
+    - GET:/archives
+    - GET:/stats
     # ===== Knife4j / Swagger 文档（开发环境需放行） =====
     - /doc.html
     - /webjars/**

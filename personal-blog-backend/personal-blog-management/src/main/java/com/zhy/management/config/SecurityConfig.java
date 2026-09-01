@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -39,8 +40,19 @@ public class SecurityConfig {
         http.authorizeHttpRequests(authz -> {
             // 放行白名单（从配置文件读取）
             if (securityProperties.getWhitelist() != null) {
-                for (String pattern : securityProperties.getWhitelist()) {
-                    authz.antMatchers(pattern).permitAll();
+                for (String item : securityProperties.getWhitelist()) {
+                    // 支持 "GET:/articles" 形式：仅对该 HTTP 方法放行（其余方法仍需认证）
+                    String[] parts = item.split(":", 2);
+                    if (parts.length == 2) {
+                        HttpMethod method = HttpMethod.resolve(parts[0].trim());
+                        if (method != null) {
+                            authz.antMatchers(method, parts[1].trim()).permitAll();
+                        } else {
+                            authz.antMatchers(parts[1].trim()).permitAll();
+                        }
+                    } else {
+                        authz.antMatchers(item).permitAll();
+                    }
                 }
             }
             // 其他任何请求都需要认证（登录后才能访问）
