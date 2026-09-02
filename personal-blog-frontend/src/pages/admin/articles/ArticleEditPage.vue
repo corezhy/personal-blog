@@ -28,16 +28,26 @@ const formRef = ref<FormInstance>()
 /** 封面上传中 */
 const coverUploading = ref(false)
 
-const form = reactive<ArticlePayload>({
+/** 编辑表单模型：categoryId 未选择前为空，让 select 显示 placeholder，提交时必填校验 */
+type ArticleFormModel = {
+  title: string
+  summary: string
+  cover?: string
+  categoryId?: number
+  tagIds: number[]
+  content: string
+}
+
+const form = reactive<ArticleFormModel>({
   title: '',
   summary: '',
   cover: '',
-  categoryId: 0,
+  categoryId: undefined,
   tagIds: [],
   content: '',
 })
 
-const rules: FormRules<ArticlePayload> = {
+const rules: FormRules<ArticleFormModel> = {
   title: [{ required: true, message: '请输入标题', trigger: 'blur' }],
   categoryId: [{ required: true, message: '请选择分类', trigger: 'change' }],
   content: [{ required: true, message: '请输入内容', trigger: 'blur' }],
@@ -101,7 +111,11 @@ async function handleSave(): Promise<void> {
   saving.value = true
   try {
     const payload: ArticlePayload = {
-      ...form,
+      title: form.title,
+      summary: form.summary,
+      content: form.content,
+      categoryId: form.categoryId as number, // 必填校验已保证有值
+      tagIds: form.tagIds,
       cover: form.cover || undefined,
     }
     if (editId) {
@@ -145,7 +159,7 @@ async function handleSave(): Promise<void> {
 
       <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
         <el-form-item label="分类" prop="categoryId">
-          <el-select v-model="form.categoryId" placeholder="选择分类" class="w-full">
+          <el-select v-model="form.categoryId" placeholder="请选择分类" class="w-full">
             <el-option
               v-for="category in categories"
               :key="category.id"
@@ -161,7 +175,6 @@ async function handleSave(): Promise<void> {
             multiple
             filterable
             allow-create
-            collapse-tags
             placeholder="选择或输入标签"
             class="w-full"
           >
