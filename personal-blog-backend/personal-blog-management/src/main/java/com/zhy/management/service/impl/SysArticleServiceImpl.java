@@ -4,6 +4,7 @@ import com.zhy.management.domain.po.SysArticle;
 import com.zhy.management.mapper.SysArticleMapper;
 import com.zhy.management.service.ISysArticleService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zhy.model.dto.ArticleInsertDto;
 import org.springframework.stereotype.Service;
 
 /**
@@ -16,5 +17,16 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class SysArticleServiceImpl extends ServiceImpl<SysArticleMapper, SysArticle> implements ISysArticleService {
+
+    /**
+     * 新增文章
+     *
+     * @param articleInsertDto
+     */
+    @Override
+    public void insertArticle(ArticleInsertDto articleInsertDto) {
+
+    }
+
 
 }
