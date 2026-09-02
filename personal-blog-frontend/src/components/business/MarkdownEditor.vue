@@ -12,11 +12,15 @@ import {
   Grid,
   Link as LinkIcon,
   List,
+  Loading,
   Minus,
   Picture,
 } from '@element-plus/icons-vue'
-import { nextTick, ref, watch } from 'vue'
+import { ElMessage } from 'element-plus'
 import type { ElInput } from 'element-plus'
+import { nextTick, ref, watch } from 'vue'
+
+import { isImageFile, MAX_IMAGE_SIZE, uploadImage } from '@/services/upload'
 
 const props = withDefaults(
   defineProps<{
@@ -35,6 +39,13 @@ const emit = defineEmits<{ (e: 'update:modelValue', value: string): void }>()
 const elInputRef = ref<InstanceType<typeof ElInput>>()
 const local = ref(props.modelValue)
 const headingVisible = ref(false)
+
+/** 隐藏的图片文件选择框 */
+const imageInputRef = ref<HTMLInputElement>()
+/** 图片上传中（按钮置灰 + loading） */
+const uploading = ref(false)
+/** 点击"图片"按钮时记录的光标选区与默认 alt，上传完成后据此插入 markdown */
+let pendingImage: { start: number; end: number; alt: string } | null = null
 
 watch(
   () => props.modelValue,
@@ -208,15 +219,59 @@ function insertLink(): void {
   }
 }
 
-/** 图片：插入图片语法并选中描述文字 */
-function insertImage(): void {
+/** 图片：点击后选择本地图片 → 上传获取 URL → 在光标处插入 ![alt](url) */
+function pickImage(): void {
+  const ta = getTextarea()
+  if (ta) {
+    pendingImage = { start: ta.selectionStart, end: ta.selectionEnd, alt: '图片' }
+  }
+  imageInputRef.value?.click()
+}
+
+/** 选择图片后的处理：校验 → 上传 → 插入 markdown 图片语法 */
+async function handleImageFile(event: Event): Promise<void> {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = ''
+  if (!file) return
+
+  if (!isImageFile(file)) {
+    ElMessage.warning('请选择图片文件（jpg / png / gif / webp 等）')
+    return
+  }
+  if (file.size > MAX_IMAGE_SIZE) {
+    ElMessage.warning('图片大小不能超过 5MB')
+    return
+  }
+  if (pendingImage) {
+    // 默认 alt 取文件名（去扩展名），上传后自动选中便于改名
+    const alt = file.name.replace(/\.[^.]+$/, '').replace(/[\]\\]/g, '').slice(0, 30)
+    pendingImage.alt = alt || '图片'
+  }
+
+  uploading.value = true
+  try {
+    const { url } = await uploadImage(file)
+    insertImageUrl(url)
+  } catch {
+    // 上传失败已由 request 层统一弹错，这里仅清理光标记录，避免下次插错位置
+    pendingImage = null
+  } finally {
+    uploading.value = false
+  }
+}
+
+/** 把上传返回的 URL 在之前光标处插成 markdown 图片语法，并选中 alt 文本 */
+function insertImageUrl(url: string): void {
   const ta = getTextarea()
   if (!ta) return
-  const { selectionStart: s, selectionEnd: e, value } = ta
-  const text = '图片描述'
-  const newValue =
-    value.slice(0, s) + '![' + text + '](https://example.com/图片.jpg)' + value.slice(e)
-  emitAndSet(newValue, s + 2, s + 2 + text.length)
+  const pos = pendingImage ?? { start: ta.selectionStart, end: ta.selectionEnd, alt: '图片' }
+  const markdown = `![${pos.alt}](${url})`
+  const newValue = ta.value.slice(0, pos.start) + markdown + ta.value.slice(pos.end)
+  const selStart = pos.start + 2 // '![' 之后，选中 alt 便于直接修改
+  ta.focus()
+  emitAndSet(newValue, selStart, selStart + pos.alt.length)
+  pendingImage = null
 }
 </script>
 
@@ -324,9 +379,10 @@ function insertImage(): void {
           <el-icon><LinkIcon /></el-icon>
         </button>
       </el-tooltip>
-      <el-tooltip content="图片" placement="top">
-        <button type="button" class="tb-btn" @click="insertImage">
-          <el-icon><Picture /></el-icon>
+      <el-tooltip :content="uploading ? '上传中…' : '图片'" placement="top">
+        <button type="button" class="tb-btn" :disabled="uploading" @click="pickImage">
+          <el-icon v-if="!uploading"><Picture /></el-icon>
+          <el-icon v-else class="is-loading"><Loading /></el-icon>
         </button>
       </el-tooltip>
     </div>
@@ -341,6 +397,15 @@ function insertImage(): void {
       resize="vertical"
       class="font-mono"
       @update:model-value="handleInput"
+    />
+
+    <!-- 隐藏的图片文件选择框：仅当点击工具栏"图片"按钮时触发 -->
+    <input
+      ref="imageInputRef"
+      type="file"
+      accept="image/*"
+      class="hidden"
+      @change="handleImageFile"
     />
   </div>
 </template>
@@ -365,6 +430,11 @@ function insertImage(): void {
 .tb-btn:hover {
   background-color: var(--el-fill-color-light);
   color: var(--el-text-color-primary);
+}
+
+.tb-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* 去掉 el-input 自带边框，由外层容器统一提供，避免出现双边框 */

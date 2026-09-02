@@ -12,6 +12,7 @@ import com.zhy.model.vo.LoginVo;
 import com.zhy.model.vo.UserInfoVo;
 import com.zhy.utils.jwt.JwtUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,15 +24,17 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class LoginServiceImpl extends ServiceImpl<LoginMapper, SysUser> implements LoginService {
 
     // 直接创建实例 参数： 强度参数（4~31，默认10）
-    private static final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
+    private static final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(10);
 
     private final JwtUtils jwtUtils;
 
     /**
      * 登录接口
+     *
      * @param loginDto
      * @return
      */
@@ -59,12 +62,14 @@ public class LoginServiceImpl extends ServiceImpl<LoginMapper, SysUser> implemen
         String token = jwtUtils.generateJwt(user.getId().toString(), claims);
 
         // 5.设置最近登录时间
-        boolean isSuccess = update(Wrappers.<SysUser>lambdaUpdate()
-                .set(SysUser::getLastLoginAt, LocalDateTime.now())
-                .eq(SysUser::getId, user.getId()));
-        if (!isSuccess) {
-            throw new BusinessException("设置最近登录时间失败！");
+        try {
+            update(Wrappers.<SysUser>lambdaUpdate()
+                    .set(SysUser::getLastLoginAt, LocalDateTime.now())
+                    .eq(SysUser::getId, user.getId()));
+        } catch (Exception e) {
+            log.warn("更新最近登录时间失败，用户：{}", user.getUsername(), e);
         }
+
 
         // 6.组装返回数据
         UserInfoVo userInfo = UserInfoVo.builder()

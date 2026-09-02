@@ -169,6 +169,22 @@ export function setupMock(): void {
     return null
   }
 
+  /* 上传图片：真实后端会转存 OSS 并返回可访问 URL，这里返回占位地址，便于无后端联调封面/正文插图 */
+  adapter.onPost(/\/upload$/).reply(config => {
+    const denied = requireAdmin(config)
+    if (denied) return denied
+    const form = config.data
+    let name = 'mock-image.png'
+    if (form instanceof FormData) {
+      const file = form.get('file')
+      if (file instanceof File) name = file.name
+    }
+    return [
+      200,
+      ok({ url: `https://mock-blog.oss-cn-beijing.aliyuncs.com/${Date.now()}-${encodeURIComponent(name)}` }),
+    ]
+  })
+
   adapter.onPost(/\/articles$/).reply(config => {
     const denied = requireAdmin(config)
     if (denied) return denied

@@ -3,7 +3,7 @@
  * 后台文章编辑 —— 新建 / 编辑（编辑/预览 Tab 切换）
  */
 import { ElMessage } from 'element-plus'
-import type { FormInstance, FormRules } from 'element-plus'
+import type { FormInstance, FormRules, UploadRawFile, UploadRequestOptions } from 'element-plus'
 import { onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -11,6 +11,7 @@ import MarkdownEditor from '@/components/business/MarkdownEditor.vue'
 import MarkdownRenderer from '@/components/business/MarkdownRenderer.vue'
 import { useTaxonomy } from '@/hooks/useTaxonomy'
 import { createArticle, getArticleDetail, updateArticle } from '@/services/article'
+import { MAX_IMAGE_SIZE, uploadImage } from '@/services/upload'
 import type { ArticlePayload } from '@/types'
 
 const route = useRoute()
@@ -23,6 +24,9 @@ const saving = ref(false)
 const activeTab = ref('edit')
 
 const formRef = ref<FormInstance>()
+
+/** 封面上传中 */
+const coverUploading = ref(false)
 
 const form = reactive<ArticlePayload>({
   title: '',
@@ -54,6 +58,40 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+/** 封面图片上传前置校验：仅图片且 ≤5MB */
+function beforeCoverUpload(file: UploadRawFile): boolean {
+  if (!file.type.startsWith('image/')) {
+    ElMessage.error('封面必须是图片文件（jpg / png / gif / webp 等）')
+    return false
+  }
+  if (file.size > MAX_IMAGE_SIZE) {
+    ElMessage.error('封面图片不能超过 5MB')
+    return false
+  }
+  return true
+}
+
+/**
+ * 自定义上传：走统一 /upload 接口，成功后把返回的 URL 回填到 cover。
+ * 失败时不调用 onError（其类型需 UploadAjaxError），直接让错误向上抛出，
+ * 由 Element Plus 内部标记上传失败；错误提示已由 request 层统一弹出。
+ */
+async function uploadCover(options: UploadRequestOptions): Promise<void> {
+  coverUploading.value = true
+  try {
+    const { url } = await uploadImage(options.file)
+    form.cover = url
+    options.onSuccess(url)
+  } finally {
+    coverUploading.value = false
+  }
+}
+
+/** 移除已上传的封面 */
+function removeCover(): void {
+  form.cover = ''
+}
 
 async function handleSave(): Promise<void> {
   if (!formRef.value) return
@@ -105,7 +143,7 @@ async function handleSave(): Promise<void> {
         />
       </el-form-item>
 
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
         <el-form-item label="分类" prop="categoryId">
           <el-select v-model="form.categoryId" placeholder="选择分类" class="w-full">
             <el-option
@@ -131,10 +169,45 @@ async function handleSave(): Promise<void> {
           </el-select>
         </el-form-item>
 
-        <el-form-item label="封面图 URL（可选）" prop="cover">
-          <el-input v-model="form.cover" placeholder="https://..." />
-        </el-form-item>
       </div>
+
+      <el-form-item label="封面图（可选）" prop="cover">
+        <div class="flex w-full items-start gap-4">
+          <el-upload
+            action="#"
+            :show-file-list="false"
+            :before-upload="beforeCoverUpload"
+            :http-request="uploadCover"
+            accept="image/*"
+          >
+            <div
+              v-loading="coverUploading"
+              class="relative flex h-24 w-40 cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-dashed border-gray-300 text-sm text-gray-400 transition-colors hover:border-gray-400 dark:border-gray-600 dark:text-gray-500 dark:hover:border-gray-400"
+            >
+              <img
+                v-if="form.cover"
+                :src="form.cover"
+                class="h-full w-full object-cover"
+                alt="封面预览"
+              />
+              <span v-else>点击上传封面</span>
+            </div>
+          </el-upload>
+          <div class="min-w-0 flex-1 pt-1">
+            <p class="text-xs leading-relaxed text-gray-400 dark:text-gray-500">
+              建议使用 ≤5MB 的 jpg / png / gif / webp 图片，点击缩略图可重新上传。
+            </p>
+            <button
+              v-if="form.cover"
+              type="button"
+              class="mt-2 text-xs text-gray-400 transition-colors hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400"
+              @click="removeCover"
+            >
+              移除封面
+            </button>
+          </div>
+        </div>
+      </el-form-item>
 
       <el-form-item label="内容（Markdown）" prop="content">
         <el-tabs v-model="activeTab" class="w-full">
