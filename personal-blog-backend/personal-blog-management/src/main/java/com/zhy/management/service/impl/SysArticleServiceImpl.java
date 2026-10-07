@@ -1,6 +1,6 @@
 package com.zhy.management.service.impl;
 
-import com.zhy.management.domain.po.SysArticle;
+import com.zhy.model.entity.SysArticle;
 import com.zhy.management.mapper.SysArticleMapper;
 import com.zhy.management.service.ISysArticleService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;

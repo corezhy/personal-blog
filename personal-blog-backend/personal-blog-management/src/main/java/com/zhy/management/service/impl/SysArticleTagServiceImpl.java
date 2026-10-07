@@ -1,6 +1,6 @@
 package com.zhy.management.service.impl;
 
-import com.zhy.management.domain.po.SysArticleTag;
+import com.zhy.model.entity.SysArticleTag;
 import com.zhy.management.mapper.SysArticleTagMapper;
 import com.zhy.management.service.ISysArticleTagService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;

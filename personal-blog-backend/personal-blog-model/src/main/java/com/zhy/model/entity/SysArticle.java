@@ -1,4 +1,4 @@
-package com.zhy.management.domain.po;
+package com.zhy.model.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;

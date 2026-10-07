@@ -1,6 +1,6 @@
 package com.zhy.management.mapper;
 
-import com.zhy.management.domain.po.SysTag;
+import com.zhy.model.entity.SysTag;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

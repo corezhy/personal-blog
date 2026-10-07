@@ -1,8 +1,9 @@
-package com.zhy.management.domain.po;
+package com.zhy.model.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import java.time.LocalDateTime;
 import java.io.Serializable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -10,7 +11,7 @@ import lombok.experimental.Accessors;
 
 /**
  * <p>
- * 文章-标签关联表
+ * 文章标签表
  * </p>
  *
  * @author Java-zhy
@@ -19,21 +20,31 @@ import lombok.experimental.Accessors;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("sys_article_tag")
-public class SysArticleTag implements Serializable {
+@TableName("sys_tag")
+public class SysTag implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     /**
-     * 文章ID(sys_article.id)
+     * 标签ID
      */
-    @TableId(value = "article_id", type = IdType.ASSIGN_ID)
-    private Long articleId;
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
 
     /**
-     * 标签ID(sys_tag.id)
+     * 标签名称
      */
-    private Long tagId;
+    private String name;
+
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createdAt;
+
+    /**
+     * 更新时间
+     */
+    private LocalDateTime updatedAt;
 
 
 }

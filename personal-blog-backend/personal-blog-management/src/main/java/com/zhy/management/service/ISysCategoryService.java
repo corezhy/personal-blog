@@ -1,6 +1,6 @@
 package com.zhy.management.service;
 
-import com.zhy.management.domain.po.SysCategory;
+import com.zhy.model.entity.SysCategory;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.zhy.model.vo.CategoryQueryVo;
 

@@ -1,6 +1,6 @@
 package com.zhy.management.service;
 
-import com.zhy.management.domain.po.SysTag;
+import com.zhy.model.entity.SysTag;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.zhy.model.vo.TagsQueryVo;
 

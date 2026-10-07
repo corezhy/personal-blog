@@ -1,6 +1,6 @@
 package com.zhy.management.mapper;
 
-import com.zhy.management.domain.po.SysCategory;
+import com.zhy.model.entity.SysCategory;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

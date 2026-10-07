@@ -1,4 +1,4 @@
-package com.zhy.management.domain.po;
+package com.zhy.model.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -11,7 +11,7 @@ import lombok.experimental.Accessors;
 
 /**
  * <p>
- * 文章标签表
+ * 文章分类表
  * </p>
  *
  * @author Java-zhy
@@ -20,21 +20,26 @@ import lombok.experimental.Accessors;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("sys_tag")
-public class SysTag implements Serializable {
+@TableName("sys_category")
+public class SysCategory implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     /**
-     * 标签ID
+     * 分类ID
      */
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
     /**
-     * 标签名称
+     * 分类名称
      */
     private String name;
+
+    /**
+     * 分类描述
+     */
+    private String description;
 
     /**
      * 创建时间

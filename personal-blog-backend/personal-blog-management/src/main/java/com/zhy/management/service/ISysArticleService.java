@@ -1,6 +1,6 @@
 package com.zhy.management.service;
 
-import com.zhy.management.domain.po.SysArticle;
+import com.zhy.model.entity.SysArticle;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.zhy.model.dto.ArticleInsertDto;
 
