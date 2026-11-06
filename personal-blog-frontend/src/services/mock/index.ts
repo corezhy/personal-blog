@@ -181,7 +181,7 @@ export function setupMock(): void {
     }
     return [
       200,
-      ok({ url: `https://mock-blog.oss-cn-beijing.aliyuncs.com/${Date.now()}-${encodeURIComponent(name)}` }),
+      ok(`https://mock-blog.oss-cn-beijing.aliyuncs.com/${Date.now()}-${encodeURIComponent(name)}`),
     ]
   })
 

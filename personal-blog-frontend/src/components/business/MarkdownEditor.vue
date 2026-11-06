@@ -251,8 +251,10 @@ async function handleImageFile(event: Event): Promise<void> {
 
   uploading.value = true
   try {
-    const { url } = await uploadImage(file)
+    // 后端 Result.data 直接就是图片 URL 字符串
+    const url = await uploadImage(file)
     insertImageUrl(url)
+    ElMessage.success('图片上传成功')
   } catch {
     // 上传失败已由 request 层统一弹错，这里仅清理光标记录，避免下次插错位置
     pendingImage = null

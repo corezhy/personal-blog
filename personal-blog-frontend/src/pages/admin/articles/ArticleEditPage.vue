@@ -90,7 +90,8 @@ function beforeCoverUpload(file: UploadRawFile): boolean {
 async function uploadCover(options: UploadRequestOptions): Promise<void> {
   coverUploading.value = true
   try {
-    const { url } = await uploadImage(options.file)
+    // 后端 Result.data 直接就是图片 URL 字符串
+    const url = await uploadImage(options.file)
     form.cover = url
     options.onSuccess(url)
   } finally {
